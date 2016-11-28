@@ -17,7 +17,7 @@ class MarkovChain:
   def __init__(self, num_key_words=2):
     self.num_key_words = num_key_words
     self.lookup_dict = defaultdict(list)
-    self._punctuation_regex = re.compile('[,.!;\?\:\-\[\]\n]+')
+    self._punctuation_regex = re.compile('[”“",.!;\?\:\-\[\]\n]+')
     self._seeded = False
     self.__seed_me()
 
@@ -54,7 +54,7 @@ class MarkovChain:
     if len(data) < self.num_key_words:
       return
 
-    for i in xrange(len(data) - self.num_key_words):
+    for i in range(len(data) - self.num_key_words):
       yield [ tuple(data[i:i+self.num_key_words]), data[i+self.num_key_words] ]
 
   """
@@ -68,7 +68,14 @@ class MarkovChain:
       self.__seed_me(rand_seed=len(self.lookup_dict))
 
       idx = random.randint(0, len(self.lookup_dict)-1)
-      chain_head = list(self.lookup_dict.keys()[idx])
+      
+      # print(idx)
+      # print(type(self.lookup_dict.keys()))
+      # print(self.lookup_dict.keys())
+
+
+      lookup_dict_keys = list(self.lookup_dict.keys())
+      chain_head = list(lookup_dict_keys[idx])
       context.extend(chain_head)
 
       while len(output) < (max_length - self.num_key_words):

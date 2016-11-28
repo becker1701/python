@@ -1,3 +1,4 @@
+
 """
 
 The markov chain program will read quotes from http://www.goodreads.com/quotes/tag/being.
@@ -19,4 +20,31 @@ The program functions like this:
 4. Program repeats until user quits
 
 """
+
+import fetch_data
+import markov_python.cc_markov
+
+
+def format_generated_quote(quote):
+    return " ".join(quote).capitalize() + "."
+
+
+data = fetch_data.FetchData()
+
+if data.response is not None:
+    with open("data.txt", "w") as f:
+        print("Writing parsed data to file...")
+        
+        for quote in data.quotes:
+            f.write(quote.get_text())
+
+    print("Generating quote...")
+    mc = markov_python.cc_markov.MarkovChain()
+    mc.add_file("data.txt")
+    generated_quote = format_generated_quote(mc.generate_text())
+
+    print(generated_quote)
+
+else:
+    print("Exiting...")
 
