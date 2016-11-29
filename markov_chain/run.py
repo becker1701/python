@@ -1,50 +1,62 @@
 
 """
 
-The markov chain program will read quotes from http://www.goodreads.com/quotes/tag/being.
+This program will generate randomized quotes of words taken from a website.  For each word, the program will assign the next word in the generated quote by looking up the current word, generating a list of next word candidates, and return a random word from the list.
 
-The user will type in a word, and the program will search through all of the quotes pulled off www.goodreads.com and return a random string that immediatly proceeds that user entered word.
+The cc_markov module will generate a list of words from quote scrapped from http://quotes.toscrape.com/.  
 
-The program functions like this:
+1. The program will open and scrape quotes.toscrape.com for the "quote" CSS span 'text' class.
+2. The program will set a FetchData member variable 'quote' and set sanitized data to it
+3. run.py will then write the FetchData quotes data to a file
+4. A MarkovChain object is intantiated and the data file is passed in
+5. The generated quote returned is 'humanized' by capitalizing the first word and adding a period.
 
-1. Setup program:
-    a: GET HTML page of quotes
-    b: parse all quotes into a local file
-2. Program prompts user for word to search for
-3. Program looks for the word in the quotes saved into the local file of quotes
-    a: Program creates a list of possible text; that is text that succeeds the user entered word
-    b: program will randomly select one of the found phrases
-    c: program prints the user enetered word and the random phrase
-    d: if the word isn't found, three randomly selected words are picked from the file and used a suggestions for the user
-    e: program will display the number of times the word was found in the file text
-4. Program repeats until user quits
+****************************************
+Python 3.5
+
+Modules included:
+requests - HTTP response/request
+BeautifulSoup - HTML parser
+markov_chain - included module from Codecademy
 
 """
 
 import fetch_data
 import markov_python.cc_markov
 
+data_file = "data.txt"
 
-def format_generated_quote(quote):
+def humanize(quote):
+    # Capitalize sentence and add period to computer generated markov quote.
     return " ".join(quote).capitalize() + "."
 
 
-data = fetch_data.FetchData()
 
-if data.response is not None:
-    with open("data.txt", "w") as f:
+data = fetch_data.FetchData() # Create a FetchData object to hold the scraped data
+
+
+if data.quotes is not None:
+    # If quotes exist, write the BeautifulSoup.text to the file
+    with open(data_file, "w") as f:
+        
         print("Writing parsed data to file...")
         
         for quote in data.quotes:
             f.write(quote.get_text())
 
+    
     print("Generating quote...")
+
+    #Create the Markov Chain object and pass in the text
     mc = markov_python.cc_markov.MarkovChain()
-    mc.add_file("data.txt")
-    generated_quote = format_generated_quote(mc.generate_text())
+    mc.add_file(data_file)
+
+    #Format and return the generated quote
+    generated_quote = humanize(mc.generate_text())
 
     print(generated_quote)
 
 else:
+    # If there is no data in the file
+    print("No data was retrived.")
     print("Exiting...")
-
