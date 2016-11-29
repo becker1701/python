@@ -23,40 +23,52 @@ markov_chain - included module from Codecademy
 
 import fetch_data
 import markov_python.cc_markov
+import requests
 
 data_file = "data.txt"
+
 
 def humanize(quote):
     # Capitalize sentence and add period to computer generated markov quote.
     return " ".join(quote).capitalize() + "."
 
-
-
-data = fetch_data.FetchData() # Create a FetchData object to hold the scraped data
-
-
-if data.quotes is not None:
-    # If quotes exist, write the BeautifulSoup.text to the file
-    with open(data_file, "w") as f:
-        
-        print("Writing parsed data to file...")
-        
-        for quote in data.quotes:
-            f.write(quote.get_text())
-
-    
-    print("Generating quote...")
-
+def generated_quote():
     #Create the Markov Chain object and pass in the text
     mc = markov_python.cc_markov.MarkovChain()
     mc.add_file(data_file)
 
     #Format and return the generated quote
-    generated_quote = humanize(mc.generate_text())
+    return humanize(mc.generate_text())
 
-    print(generated_quote)
 
-else:
-    # If there is no data in the file
-    print("No data was retrived.")
-    print("Exiting...")
+def run():
+    
+    try:
+        fd_data = fetch_data.FetchData() # Create a FetchData object to hold the scraped data
+
+    except requests.Timeout:
+        print("A timeout error has occured.")
+
+    except requests.ConnectionError:
+        print("A connection error has occured.")
+
+    except requests.RequestException:
+        print("An error has occured")
+
+    else:
+
+        if fd_data.quotes is not None:
+
+            # If quotes exist, write the BeautifulSoup.text to the file
+            with open(data_file, "w") as f:
+                for quote in fd_data.quotes:
+                    f.write(quote.get_text()) # get_text() is a BS4 method
+
+            print(generated_quote())
+
+        else:
+            # If there is no data in the file
+            print("No text was retrived.")
+            print("Exiting...")
+
+run()
